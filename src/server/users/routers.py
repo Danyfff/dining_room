@@ -1,28 +1,26 @@
-from fastapi import APIRouter
 from typing import List
-from .models import User, InputUser, NewId
-from .resolvers import get_users, add_new_user, delete_current_user, check_user
+from fastapi import APIRouter
+from .models import User, UserId
+from .resolvers import get_all_users, add_new_user, delete_user, check_user
 
 router = APIRouter()
 
 
-
 @router.get('/check')
-def check_exists_user(user: InputUser) -> User:
+def check_exists_user(user: User) -> User:
     return check_user(user)
 
 
 @router.get('/')
-def get_group() -> List[User]:
-    return get_users()
+def get_users() -> List[User]:
+    return get_all_users()
 
 
 @router.post('/')
-def add_group(new_user: InputUser) -> NewId:
+def add_user(new_user: User) -> UserId:
     return add_new_user(new_user)
 
 
-@router.delete("/{user_id}")
-def delete_group(user_id: int) -> NewId:
-    return delete_current_user(user_id)
-
+@router.get("/{user_id}")
+def delete_corency_user(user_id: int) -> UserId:
+    return delete_user(user_id)

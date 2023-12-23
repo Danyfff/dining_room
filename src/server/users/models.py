@@ -1,26 +1,16 @@
-from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 
 
 class User(BaseModel):
-    id: int
-    login: Optional[str] = None
-    reg_date: Optional[datetime] = None
-    post_id: int
-    post: Optional[str] = None
-
-
-class InputUser(BaseModel):
-    login: str
-    password: str
-    post_id: Optional[int] = None
-
-
-class Post(BaseModel):
     id: Optional[int] = None
-    name: str
+    fio: Optional[str] = None
+    password: Optional[str] = None
+    phone: Optional[int] = None
+    email: Optional[str] = None
+    stat_user: Optional[str] = None
 
-class NewId(BaseModel):
+
+class UserId(BaseModel):
     code: int
     id: int

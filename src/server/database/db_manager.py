@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from ..settings import DB_PATH
+from src.server.settings import DB_PATH
 
 
 class DBManager:
@@ -8,14 +8,17 @@ class DBManager:
         self.db_path = db_path
         print(db_path, self.db_path)
 
+# Проверка существования БД
     def check_base(self):
         return os.path.exists(self.db_path)
 
+# Подключение к БД и  создание курсора
     def connect_to_base(self):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         return conn, cur
 
+# Создание и заполнение таблиц
     def create_base(self, script_tables_path: str, script_data_path: str):
         conn, cur = self.connect_to_base()
         try:
@@ -27,6 +30,7 @@ class DBManager:
             print(ex)
             os.remove(self.db_path)
 
+# Функция для выполнения запросов к БД
     def execute(self, query: str, args=(), many: bool = True):
         conn, cur = self.connect_to_base()
         try:

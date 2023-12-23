@@ -1,41 +1,39 @@
-from datetime import datetime
-from typing import List
-from .models import User, InputUser, NewId, Post
-from ..database.db_manager import base_manager
+from .models import User, UserId
+from src.server.database.db_manager import base_manager
 
 
-def check_user(login: InputUser) -> User:
-    res = base_manager.execute("SELECT id, post_id "
+# Для проверки пароля и телефона получения статуса
+def check_user(login: User) -> User:
+    res = base_manager.execute("SELECT id, stat_user "
                                "FROM users "
-                               "WHERE login= ? AND password = ?", args=(login.login.lower(), login.password), many=False)
+                               "WHERE password = ? AND phone = ? ", args=(login.password, login.phone, ), many=False)
     print(res)
     if res['data']:
-        return User(id=res['data'][0], post_id=res['data'][1])
+        return User(id=res['data'][0][0], stat_user=res['data'][1])
     else:
-        return User(id=0, post_id=0)
+        return User(id=0, stat_user=None)
 
 
-def get_users():
-    res = base_manager.execute("SELECT U.id, U.login, datetime(U.reg_date, 'unixepoch', 'localtime'), P.id, P.name "
-                               "FROM users U "
-                               "INNER JOIN posts P ON U.post_id = P.id", many=True)
+# Все пользователи по статусу
+def get_all_users():
+    res = base_manager.execute("SELECT id, fio, phone, email, stat_user "
+                               "FROM users ", many=True)
     users = []
     for user in res['data']:
-        print()
-        users.append(User(id=user[0], login=user[1], reg_date=datetime.strptime(user[2],'%Y-%m-%d %H:%M:%S'),
-                     post_id=user[3], post=user[4]))
+        users.append(User(id=user[0], fio=user[1], phone=user[2], email=user[3], stat_user=user[4]))
     return users
 
 
-def add_new_user(new_user: InputUser):
-    res = base_manager.execute("INSERT INTO users(login, password, post_id) "
-                               "VALUES (?, ?, ?) "
-                               "RETURNING id", args=(new_user.login.lower(), new_user.password, new_user.post_id))
-    return NewId(code=res['code'], id=res['data'][0][0])
+# Все пользователи по статусу
+def add_new_user(new_user: User):
+    res = base_manager.execute("INSERT INTO users(fio, password, phone, email, stat_user) "
+                               "VALUES (?, ?, ?, ?, ? ) "
+                               "RETURNING id", args=(new_user.fio, new_user.password, new_user.phone, new_user.email, new_user.stat_user, ))
+    return UserId(code=res['code'], id=res['data'][0][0])
 
 
-def delete_current_user(user_id: int):
-    res = base_manager.execute("DELETE FROM users WHERE id = ?",
-                               args=(user_id,))
-    return NewId(code=res['code'], id=user_id)
-
+# Удаление поьзователя
+def delete_user(user_id: int):
+    res = base_manager.execute("DELETE FROM users WHERE id = ? ",
+                               args=(user_id, ))
+    return UserId(code=res['code'], id=user_id)
